@@ -3,12 +3,16 @@ joint ARD reproduction (App. D.2 of the paper)."""
 
 from __future__ import annotations
 
+import os
 import numpy as np
 import pandas as pd
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.preprocessing import StandardScaler
 
-DATA_DIR = "/tmp/opencode/data"
+DATA_DIR = os.environ.get(
+    "REPRO_DATA_DIR",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"),
+)
 
 
 def load_energy():
