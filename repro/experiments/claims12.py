@@ -27,7 +27,7 @@ def primal_dual_audit():
     sign2, ld2 = np.linalg.slogdet(Stheta_inv)
     Stheta = np.linalg.inv(Stheta_inv)
     ytilde = X.T @ (y / lam)
-    dual = ld2 - np.sum(np.log(G)) + np.sum(np.log(L)) + (
+    dual = ld2 - np.sum(np.log(G)) + np.sum(np.log(lam)) + (
         np.sum(y * y / lam) - ytilde @ Stheta @ ytilde)
     return abs(primal - dual)
 
@@ -52,11 +52,15 @@ def outlier_downweighting_demo():
 
     results = {}
     for method in ["em", "mackay", "l2_irls", "l1_irls"]:
-        het = JointARD(method=method, heteroscedastic=True, max_iter=8000)
+        het = JointARD(method=method, heteroscedastic=True, max_iter=1500, damp_lambda=2e-2)
         het.fit(X, y)
-        homo = JointARD(method=method, heteroscedastic=False, max_iter=8000)
+        homo = JointARD(method=method, heteroscedastic=False, max_iter=1500, damp_lambda=2e-2)
         homo.fit(X, y)
         lam = het.lambda_
+        # top-k outlier recovery: fraction of true outliers in top |O| lambda ranks
+        k = int(np.floor(rho * n))
+        topk = np.argsort(lam)[-k:]
+        recovery = mask[topk].mean()
         results[method] = {
             "lambda_outlier_mean": float(lam[mask].mean()),
             "lambda_inlier_mean": float(lam[~mask].mean()),
@@ -65,6 +69,7 @@ def outlier_downweighting_demo():
             "ess_theta_homo": ess_from_scores(1 / homo.gamma_) * 100,
             "ess_y_homo": ess_from_scores(1 / homo.lambda_) * 100,
             "n_iter_het": het.n_iter_,
+            "outlier_recovery_topk": float(recovery),
         }
     return results
 
