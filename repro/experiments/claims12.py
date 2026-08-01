@@ -87,6 +87,18 @@ def em_objective_monotonic():
     return {"frac_decreasing": float((diffs <= 1e-8).mean()), "final": float(obj[-1])}
 
 
+def run_all():
+    """Run all claim 1-2 checks and print a compact summary."""
+    print("=== CLAIM1/2 DUAL AUDIT ===")
+    print("PRIMAL-DUAL MAX ABS DIFF:", primal_dual_audit())
+    print("=== CLAIM1/2 EM MONOTONICITY ===")
+    print("EM MONOTONIC:", em_objective_monotonic())
+    print("=== CLAIM1/2 OUTLIER DOWNWEIGHTING ===")
+    for method, res in outlier_downweighting_demo().items():
+        print(method, res)
+    print("CLAIMS12_DONE")
+
+
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
     if what in ("all", "dual"):
