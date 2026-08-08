@@ -89,6 +89,22 @@ def run(dataset, n_trials=N_TRIALS, rho=RHO, seed0=0):
     return summary
 
 
+def run_all(n_trials=N_TRIALS, rho=RHO):
+    """Run all datasets, print a compact human-readable summary."""
+    for dataset in DATASETS:
+        print(f"=== CLAIM3 {dataset} ===")
+        out = run(dataset, n_trials=n_trials, rho=rho)
+        for k in sorted(out.keys()):
+            if k.startswith("_"):
+                continue
+            v = out[k]
+            rel = f"  rel_vs_homo={v.get('rel_vs_homo_pct', float('nan')):+.1f}%"
+            print(f"  {k:>16s}  RMSE={v['rmse_mean']:.4f}±{v['rmse_std']:.4f}  "
+                  f"ESSth={v['ess_theta_mean']:.1f}%  ESSy={v['ess_y_mean']:.1f}%{rel}")
+        print(f"  _wallclock_s={out['_wallclock_s']:.1f}")
+    print("CLAIM3_DONE")
+
+
 if __name__ == "__main__":
     dataset = sys.argv[1]
     out = run(dataset)
